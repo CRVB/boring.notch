@@ -55,22 +55,22 @@ struct BoringHeader: View {
                     } else {
                         if Defaults[.screenshotButtonInNotch] {
                             // Little Boring Notch: screenshot straight to the clipboard.
-                            Button(action: {
-                                vm.close()
-                                ScreenshotLauncher.open(on: vm.screenUUID.flatMap { NSScreen.screen(withUUID: $0) })
-                            }) {
-                                Capsule()
-                                    .fill(.black)
-                                    .frame(width: 30, height: 30)
-                                    .overlay {
-                                        Image(systemName: "camera.viewfinder")
-                                            .foregroundColor(.white)
-                                            .padding()
-                                            .imageScale(.medium)
-                                    }
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                            .help("Copy a screenshot to the clipboard")
+                            // One click: a region you drag out. Two clicks: the whole screen.
+                            Capsule()
+                                .fill(.black)
+                                .frame(width: 30, height: 30)
+                                .overlay {
+                                    Image(systemName: "camera.viewfinder")
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .imageScale(.medium)
+                                }
+                                .contentShape(Capsule())
+                                // The double-click is declared first so a single click
+                                // only fires once the second click has failed to arrive.
+                                .onTapGesture(count: 2) { takeScreenshot(.fullScreen) }
+                                .onTapGesture { takeScreenshot(.region) }
+                                .help("Click: copy a region · Double-click: copy the whole screen")
                         }
                         if Defaults[.showMirror] && coordinator.currentView == .home {
                             Button(action: {
@@ -131,6 +131,12 @@ struct BoringHeader: View {
         }
         .foregroundColor(.gray)
         .environmentObject(vm)
+    }
+
+    private func takeScreenshot(_ mode: ScreenshotLauncher.Mode) {
+        let screen = vm.screenUUID.flatMap { NSScreen.screen(withUUID: $0) }
+        vm.close()
+        ScreenshotLauncher.take(mode, on: screen)
     }
 
     func isOSDType(_ type: SneakContentType) -> Bool {

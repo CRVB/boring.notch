@@ -16,6 +16,9 @@ struct TimersSettingsView: View {
     @Default(.reminderTargetListID) private var targetListID
     @Default(.remindersShowUndated) private var showUndated
     @Default(.reminderSnoozeMinutes) private var snoozeMinutes
+    @Default(.screenshotShortcutEnabled) private var shortcutEnabled
+    @Default(.screenshotShortcutKey) private var shortcutKey
+    @State private var inputMonitoring = ScreenshotShortcut.hasInputMonitoringAccess
     @Default(.countdownPeekMode) private var peekMode
     @Default(.reminderAlertSeconds) private var alertSeconds
 
@@ -36,8 +39,31 @@ struct TimersSettingsView: View {
                 Defaults.Toggle(key: .tabSwipeEnabled) {
                     Text("Swipe with two fingers to switch tabs")
                 }
+                Defaults.Toggle(key: .screenshotAddToShelf) {
+                    Text("Also add screenshots to the Shelf")
+                }
+                Defaults.Toggle(key: .screenshotShortcutEnabled) {
+                    Text("Take a region screenshot by double-pressing a key")
+                }
+                if shortcutEnabled {
+                    Picker("Shortcut key", selection: $shortcutKey) {
+                        ForEach(ShortcutModifier.allCases) { key in
+                            Text(verbatim: "\(key.symbol) \(key.name)").tag(key)
+                        }
+                    }
+                    if !inputMonitoring {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Using the shortcut in other apps needs Input Monitoring permission.")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                            Button("Open Input Monitoring Settings") {
+                                ScreenshotShortcut.openInputMonitoringSettings()
+                            }
+                        }
+                    }
+                }
                 Defaults.Toggle(key: .screenshotButtonInNotch) {
-                    Text("Show screenshot-to-clipboard button in the notch")
+                    Text("Show screenshot button in the notch (click: region, double-click: full screen)")
                 }
             } footer: {
                 Text("Adds a tab with a countdown timer and your Apple Reminders to the open notch. Key moments shows the countdown when it starts, at one minute left and during the last ten seconds.")
@@ -131,7 +157,12 @@ struct TimersSettingsView: View {
         .accentColor(.effectiveAccent)
         .navigationTitle("Timers")
         .onAppear {
+            inputMonitoring = ScreenshotShortcut.hasInputMonitoringAccess
             Task { await reminders.reload() }
+        }
+        // Coming back from System Settings after granting the permission.
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            inputMonitoring = ScreenshotShortcut.hasInputMonitoringAccess
         }
         .onChange(of: showUndated) { _, _ in
             Task { await reminders.reload() }

@@ -6397,6 +6397,12 @@
             "state" : "translated",
             "value" : "Выберите файлы для отправки через %@"
           }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ile paylaşılacak dosyaları seçin"
+          }
         }
       }
     },
@@ -25523,6 +25529,12 @@
             "state" : "translated",
             "value" : "Выбрать файлы для %@"
           }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ için Dosya Seç"
+          }
         }
       }
     },
@@ -33380,6 +33392,1266 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "YouTube 音樂需要安裝此第三方應用程式: "
+          }
+        }
+      }
+    },
+    "%@ countdown finished" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ geri sayım tamamlandı"
+          }
+        }
+      }
+    },
+    "%@ — trying again" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — yeniden denenecek"
+          }
+        }
+      }
+    },
+    "%lld min" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld dk"
+          }
+        }
+      }
+    },
+    "%lld s" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sn"
+          }
+        }
+      }
+    },
+    "%lldm" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld dk"
+          }
+        }
+      }
+    },
+    "Add 1 minute" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 dakika ekle"
+          }
+        }
+      }
+    },
+    "Add new reminders to" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni hatırlatıcıların ekleneceği liste"
+          }
+        }
+      }
+    },
+    "Adds a tab with a countdown timer and your Apple Reminders to the open notch. Key moments shows the countdown when it starts, at one minute left and during the last ten seconds." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açık çentiğe bir geri sayım zamanlayıcısı ve Apple Anımsatıcılar listenin bulunduğu bir sekme ekler. \"Önemli anlarda\" seçeneği geri sayımı başlarken, 1 dakika kala ve son on saniyede gösterir."
+          }
+        }
+      }
+    },
+    "Adds your Cloudreve storage as a Quick Share target on the Shelf, and can send every screenshot there. Files wait in a queue while you're offline or the server can't be reached, and upload on their own later." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudreve depolama alanını Raf'ta bir Hızlı Paylaş hedefi olarak ekler ve istersen her ekran görüntüsünü oraya gönderir. Çevrimdışıyken ya da sunucuya ulaşılamıyorken dosyalar bir sırada bekler, sonra kendiliğinden yüklenir."
+          }
+        }
+      }
+    },
+    "Alert at the due time" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zamanı gelince uyar"
+          }
+        }
+      }
+    },
+    "Allow Reminders Access" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anımsatıcılar Erişimine İzin Ver"
+          }
+        }
+      }
+    },
+    "Allow access to show and add reminders." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hatırlatıcıları göstermek ve eklemek için erişime izin ver."
+          }
+        }
+      }
+    },
+    "Also add screenshots to the Shelf" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran görüntülerini Raf'a da ekle"
+          }
+        }
+      }
+    },
+    "Always" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her zaman"
+          }
+        }
+      }
+    },
+    "Backlog" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beklemede"
+          }
+        }
+      }
+    },
+    "Cancel all waiting file uploads?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekleyen tüm dosya yüklemeleri iptal edilsin mi?"
+          }
+        }
+      }
+    },
+    "Cancel all waiting screenshot uploads?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekleyen tüm ekran görüntüsü yüklemeleri iptal edilsin mi?"
+          }
+        }
+      }
+    },
+    "Cancel all…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tümünü iptal et…"
+          }
+        }
+      }
+    },
+    "Cancel and delete screenshots" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İptal et ve ekran görüntülerini sil"
+          }
+        }
+      }
+    },
+    "Cancel the upload" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklemeyi iptal et"
+          }
+        }
+      }
+    },
+    "Cancel the upload and delete the screenshot" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklemeyi iptal et ve ekran görüntüsünü sil"
+          }
+        }
+      }
+    },
+    "Cancel uploads" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklemeleri iptal et"
+          }
+        }
+      }
+    },
+    "Canceled" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İptal Edildi"
+          }
+        }
+      }
+    },
+    "Cancelling a screenshot also removes it from the Shelf and from this Mac." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir ekran görüntüsünü iptal etmek onu Raf'tan ve bu Mac'ten de siler."
+          }
+        }
+      }
+    },
+    "Change status" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durumu değiştir"
+          }
+        }
+      }
+    },
+    "Check the address, user name and password" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresi, kullanıcı adını ve şifreyi kontrol et"
+          }
+        }
+      }
+    },
+    "Click to start or pause" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlatmak veya duraklatmak için tıkla"
+          }
+        }
+      }
+    },
+    "Click: copy a region · Double-click: copy the whole screen" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tıkla: bölge kopyala · Çift tıkla: tüm ekranı kopyala"
+          }
+        }
+      }
+    },
+    "Completed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamamlandı"
+          }
+        }
+      }
+    },
+    "Connected" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlandı"
+          }
+        }
+      }
+    },
+    "Copied to the clipboard" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Panoya kopyalandı"
+          }
+        }
+      }
+    },
+    "Countdown" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geri sayım"
+          }
+        }
+      }
+    },
+    "Countdown under the closed notch" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapalı çentiğin altında geri sayım"
+          }
+        }
+      }
+    },
+    "Create a project with + to start a list" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liste başlatmak için + ile bir proje oluştur"
+          }
+        }
+      }
+    },
+    "Default list" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varsayılan liste"
+          }
+        }
+      }
+    },
+    "Delete project" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projeyi sil"
+          }
+        }
+      }
+    },
+    "Delete task" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görevi sil"
+          }
+        }
+      }
+    },
+    "Delete?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silinsin mi?"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamam"
+          }
+        }
+      }
+    },
+    "Due" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaman"
+          }
+        }
+      }
+    },
+    "Due date" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son tarih"
+          }
+        }
+      }
+    },
+    "Files" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosyalar"
+          }
+        }
+      }
+    },
+    "Folders" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klasörler"
+          }
+        }
+      }
+    },
+    "Folders are relative to the root of your WebDAV account and are created if they don't exist. A file that has the same name as an existing one gets a number added instead of replacing it." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klasörler WebDAV hesabının köküne görelidir ve yoksa oluşturulur. Mevcut bir dosyayla aynı adı taşıyan dosyanın üzerine yazılmaz, adına bir numara eklenir."
+          }
+        }
+      }
+    },
+    "In 1 hour" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 saat sonra"
+          }
+        }
+      }
+    },
+    "In 15 minutes" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 dakika sonra"
+          }
+        }
+      }
+    },
+    "In Cloudreve, open your account settings, switch on WebDAV and create a WebDAV account. Use the user name and password you set there — the server address is just your Cloudreve address (…/dav is added for you)." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudreve'de hesap ayarlarını aç, WebDAV'ı etkinleştir ve bir WebDAV hesabı oluştur. Orada belirlediğin kullanıcı adını ve şifreyi kullan; sunucu adresi yalnızca Cloudreve adresindir (…/dav senin için eklenir)."
+          }
+        }
+      }
+    },
+    "In Progress" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devam Ediyor"
+          }
+        }
+      }
+    },
+    "Key moments" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önemli anlarda"
+          }
+        }
+      }
+    },
+    "Loading…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yükleniyor…"
+          }
+        }
+      }
+    },
+    "Mark as completed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamamlandı olarak işaretle"
+          }
+        }
+      }
+    },
+    "Name on the Shelf" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raf'ta görünen ad"
+          }
+        }
+      }
+    },
+    "Never" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiçbir zaman"
+          }
+        }
+      }
+    },
+    "New project" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni proje"
+          }
+        }
+      }
+    },
+    "New reminder" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni hatırlatıcı"
+          }
+        }
+      }
+    },
+    "New task" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni görev"
+          }
+        }
+      }
+    },
+    "No date" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarihsiz"
+          }
+        }
+      }
+    },
+    "No tasks yet — add the first one below." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Henüz görev yok — ilkini aşağıdan ekle."
+          }
+        }
+      }
+    },
+    "Nothing is waiting to upload." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklenmeyi bekleyen bir şey yok."
+          }
+        }
+      }
+    },
+    "Nothing to do 🎉" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yapılacak bir şey yok 🎉"
+          }
+        }
+      }
+    },
+    "Offline — nothing is waiting." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çevrimdışı — bekleyen bir şey yok."
+          }
+        }
+      }
+    },
+    "Open Reminders" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anımsatıcılar'ı aç"
+          }
+        }
+      }
+    },
+    "Password" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şifre"
+          }
+        }
+      }
+    },
+    "Planned" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planlandı"
+          }
+        }
+      }
+    },
+    "Play a sound when the countdown ends" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geri sayım bitince ses çal"
+          }
+        }
+      }
+    },
+    "Preset %lld" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hazır süre %lld"
+          }
+        }
+      }
+    },
+    "Project name" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proje adı"
+          }
+        }
+      }
+    },
+    "Projects with their own checklists. Stored only on this Mac." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her birinin kendi yapılacaklar listesi olan projeler. Yalnızca bu Mac'te saklanır."
+          }
+        }
+      }
+    },
+    "Quick Todo" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hızlı Yapılacaklar"
+          }
+        }
+      }
+    },
+    "Ready" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hazır"
+          }
+        }
+      }
+    },
+    "Region copied" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölge kopyalandı"
+          }
+        }
+      }
+    },
+    "Reminders are read from and saved to the Reminders app, so they sync with your other devices." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hatırlatıcılar Anımsatıcılar uygulamasından okunur ve oraya kaydedilir; bu yüzden diğer cihazlarınla eşitlenir."
+          }
+        }
+      }
+    },
+    "Remove 1 minute" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 dakika çıkar"
+          }
+        }
+      }
+    },
+    "Remove from Shelf" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raf'tan kaldır"
+          }
+        }
+      }
+    },
+    "Reset" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıfırla"
+          }
+        }
+      }
+    },
+    "Restart" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden başlat"
+          }
+        }
+      }
+    },
+    "Retry now" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şimdi yeniden dene"
+          }
+        }
+      }
+    },
+    "Running" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çalışıyor"
+          }
+        }
+      }
+    },
+    "Save and test connection" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydet ve bağlantıyı dene"
+          }
+        }
+      }
+    },
+    "Saved in the keychain" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtar Zinciri'nde kayıtlı"
+          }
+        }
+      }
+    },
+    "Screen copied" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran kopyalandı"
+          }
+        }
+      }
+    },
+    "Screenshots" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran Görüntüleri"
+          }
+        }
+      }
+    },
+    "Screenshots folder" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran görüntüleri klasörü"
+          }
+        }
+      }
+    },
+    "Server" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu"
+          }
+        }
+      }
+    },
+    "Server address" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu adresi"
+          }
+        }
+      }
+    },
+    "Shared files folder" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paylaşılan dosyalar klasörü"
+          }
+        }
+      }
+    },
+    "Show Quick Todo tab" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hızlı Yapılacaklar sekmesini göster"
+          }
+        }
+      }
+    },
+    "Show Timers tab" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zamanlayıcılar sekmesini göster"
+          }
+        }
+      }
+    },
+    "Show due reminders for" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zamanı gelen hatırlatıcıyı şu kadar göster"
+          }
+        }
+      }
+    },
+    "Show reminder and countdown alerts in the notch" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hatırlatıcı ve geri sayım uyarılarını çentikte göster"
+          }
+        }
+      }
+    },
+    "Show reminders without a due date" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarihsiz hatırlatıcıları göster"
+          }
+        }
+      }
+    },
+    "Show screenshot button in the notch (click: region, double-click: full screen)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çentikte ekran görüntüsü düğmesini göster (tıkla: bölge, çift tıkla: tüm ekran)"
+          }
+        }
+      }
+    },
+    "Snooze %lld min" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld dk ertele"
+          }
+        }
+      }
+    },
+    "Snooze for" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erteleme süresi"
+          }
+        }
+      }
+    },
+    "Start" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlat"
+          }
+        }
+      }
+    },
+    "Swipe with two fingers to switch tabs" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme değiştirmek için iki parmakla kaydır"
+          }
+        }
+      }
+    },
+    "The server answered with HTTP %lld" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu HTTP %lld ile yanıt verdi"
+          }
+        }
+      }
+    },
+    "The server did not answer in time" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu zamanında yanıt vermedi"
+          }
+        }
+      }
+    },
+    "The server refused the user name or password" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu kullanıcı adını veya şifreyi reddetti"
+          }
+        }
+      }
+    },
+    "They aren't on the server yet. Cancelling also removes them from the Shelf and from this Mac." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Henüz sunucuda değiller. İptal etmek onları Raf'tan ve bu Mac'ten de siler."
+          }
+        }
+      }
+    },
+    "They aren't on the server yet. Your original files are not touched." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Henüz sunucuda değiller. Asıl dosyalarına dokunulmaz."
+          }
+        }
+      }
+    },
+    "Time's up" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Süre doldu"
+          }
+        }
+      }
+    },
+    "Timers" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zamanlayıcılar"
+          }
+        }
+      }
+    },
+    "Timers & Todo" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Süre ve Görevler"
+          }
+        }
+      }
+    },
+    "Today" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugün"
+          }
+        }
+      }
+    },
+    "Tomorrow" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yarın"
+          }
+        }
+      }
+    },
+    "Tomorrow at 09:00" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yarın 09:00"
+          }
+        }
+      }
+    },
+    "Tonight at 20:00" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu akşam 20:00"
+          }
+        }
+      }
+    },
+    "Upload failed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklenemedi"
+          }
+        }
+      }
+    },
+    "Upload queue" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yükleme sırası"
+          }
+        }
+      }
+    },
+    "Upload screenshots automatically" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran görüntülerini otomatik yükle"
+          }
+        }
+      }
+    },
+    "Upload to Cloudreve" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudreve'e yükle"
+          }
+        }
+      }
+    },
+    "Uploaded" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklendi"
+          }
+        }
+      }
+    },
+    "Uploaded to %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklendi: %@"
+          }
+        }
+      }
+    },
+    "Uploading" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yükleniyor"
+          }
+        }
+      }
+    },
+    "Uploading…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yükleniyor…"
+          }
+        }
+      }
+    },
+    "Uploads are retried automatically, a little later each time they fail." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklemeler otomatik olarak yeniden denenir; her başarısızlıktan sonra biraz daha geç."
+          }
+        }
+      }
+    },
+    "Waiting for a connection" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantı bekleniyor"
+          }
+        }
+      }
+    },
+    "Waiting to upload" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklenmeyi bekliyor"
+          }
+        }
+      }
+    },
+    "WebDAV password" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WebDAV şifresi"
+          }
+        }
+      }
+    },
+    "WebDAV user name" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WebDAV kullanıcı adı"
+          }
+        }
+      }
+    },
+    "You're offline. Waiting files go up by themselves when the connection is back." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çevrimdışısın. Bağlantı gelince bekleyen dosyalar kendiliğinden yüklenir."
+          }
+        }
+      }
+    },
+    "Take a region screenshot by double-pressing a key" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir tuşa çift basarak bölge ekran görüntüsü al"
+          }
+        }
+      }
+    },
+    "Shortcut key" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kısayol tuşu"
+          }
+        }
+      }
+    },
+    "Using the shortcut in other apps needs Input Monitoring permission." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kısayolun diğer uygulamalarda çalışması için Girdi İzleme izni gerekir."
+          }
+        }
+      }
+    },
+    "Open Input Monitoring Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Girdi İzleme Ayarlarını Aç"
           }
         }
       }

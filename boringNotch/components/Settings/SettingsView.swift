@@ -17,6 +17,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
     case calendar
     case timers
     case shelf
+    case cloudreve
     case mirror
     case battery
     case osd
@@ -40,6 +41,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         case .calendar: "Calendar"
         case .timers: "Timers & Todo"
         case .shelf: "Shelf"
+        case .cloudreve: "Cloudreve"
         case .mirror: "Mirror"
         case .battery: "Battery"
         case .osd: "OSD"
@@ -58,6 +60,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         case .calendar: .system("calendar")
         case .timers: .system("timer")
         case .shelf: .system("tray.and.arrow.down")
+        case .cloudreve: .system("icloud.and.arrow.up")
         case .mirror: .system("video")
         case .battery: .system("battery.100.bolt")
         case .osd: .system("dial.medium.fill")
@@ -114,6 +117,8 @@ struct SettingsView: View {
                     BatterySettingsView()
                 case .shelf:
                     ShelfSettingsView()
+                case .cloudreve:
+                    CloudreveSettingsView()
                 case .mirror:
                     WebcamSettingsView(camera: camera)
                 case .shortcuts:
@@ -133,6 +138,11 @@ struct SettingsView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .navigationSplitViewStyle(.balanced)
+        #if DEBUG
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("debug.settingsTab"))) { note in
+            if let raw = note.object as? String, let tab = SettingsTab(rawValue: raw) { selectedTab = tab }
+        }
+        #endif
         .toolbar(removing: .sidebarToggle)
         .toolbar {
             ToolbarItem(placement: .principal) {

@@ -280,6 +280,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        // Load the upload queue now, so waiting files go out as soon as the Mac is online.
+        _ = UploadQueue.shared
+
+        // Double-press ⌘ (or ⌥ / ⌃) for a region screenshot.
+        ScreenshotShortcut.shared.start()
+
         // Start watching Reminders now, so due alerts fire even if the Timers tab never opened.
         if Defaults[.timersEnabled] {
             _ = ReminderManager.shared
@@ -289,13 +295,192 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Debug-only hook so the notch can be driven from a script while testing:
         //   post "com.crvb.littleboringnotch.debug.showTab" with object home|shelf|timers|close
         DistributedNotificationCenter.default().addObserver(
-            forName: NSNotification.Name("com.crvb.littleboringnotch.debug.showTab"),
+            forName: NSNotification.Name("\(bundleIdentifier).debug.showTab"),
             object: nil, queue: .main) { [weak self] notification in
                 let tab = notification.object as? String
                 Task { @MainActor in
                     guard let self else { return }
                     if tab == "close" {
                         self.vm.close()
+                        return
+                    }
+                    if tab == "shelf:list" {
+                        let names = ShelfStateViewModel.shared.items.map { $0.displayName + ($0.isTemporary ? "*" : "") }
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(names.joined(separator: "\n"), forType: .string)
+                        return
+                    }
+                    if let tab, tab.hasPrefix("shelf:removeNamed:") {
+                        let name = String(tab.dropFirst("shelf:removeNamed:".count))
+                        let shelf = ShelfStateViewModel.shared
+                        for item in shelf.items where item.isTemporary && item.displayName == name { shelf.remove(item) }
+                        return
+                    }
+                    if let tab, tab.hasPrefix("shelf:fakeItems:"), let count = Int(tab.dropFirst("shelf:fakeItems:".count)) {
+                        // Extra Shelf items (never queued for upload) so the Shelf has something to scroll;
+                        // remove them again with shelf:removeProbeItems.
+                        Task {
+                            for n in 1...max(1, count) {
+                                if let url = await TemporaryFileStorageService.shared.createTempFile(for: .data(Data("x".utf8), suggestedName: "__PROBE__ \(n).txt")),
+                                   let bookmark = try? Bookmark(url: url) {
+                                    ShelfStateViewModel.shared.add([ShelfItem(kind: .file(bookmark: bookmark.data), isTemporary: true)])
+                                }
+                            }
+                        }
+                        return
+                    }
+                    if tab == "shelf:removeProbeItems" {
+                        let shelf = ShelfStateViewModel.shared
+                        for item in shelf.items where item.isTemporary && item.displayName.hasPrefix("__PROBE__") { shelf.remove(item) }
+                        return
+                    }
+                    if tab == "scroll:probe" {
+                        // '#' = a two-finger swipe starting there scrolls something sideways (tab swipe is ignored)
+                        guard let window = NSApp.windows.first(where: { $0 is BoringNotchSkyLightWindow }) else { return }
+                        let step: CGFloat = 20
+                        var rows: [String] = []
+                        var y = window.frame.height - 2
+                        while y > 0 {
+                            var row = ""
+                            var x: CGFloat = 2
+                            while x < window.frame.width {
+                                row += TabSwipeMonitor.Coordinator.isOverHorizontalScroller(in: window, at: NSPoint(x: x, y: y)) ? "#" : "."
+                                x += step
+                            }
+                            rows.append(row)
+                            y -= step
+                        }
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(rows.joined(separator: "\n"), forType: .string)
+                        return
+                    }
+                    if tab == "settingsWindow:tall" {
+                        // Stretches the Settings window so a long page can be photographed whole.
+                        SettingsWindowController.shared.window?.setContentSize(NSSize(width: 700, height: 1250))
+                        return
+                    }
+                    if let tab, tab.hasPrefix("settings:") {
+                        // settings:<tab raw name> — opens the Settings window on that tab
+                        SettingsWindowController.shared.showWindow()
+                        let raw = String(tab.dropFirst("settings:".count))
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            NotificationCenter.default.post(name: Notification.Name("debug.settingsTab"), object: raw)
+                        }
+                        return
+                    }
+                    if tab == "cloud:off" {
+                        Defaults[.cloudreveEnabled] = false
+                        QuickShareService.shared.refreshCloudreveProvider()
+                        return
+                    }
+                    if tab == "cloud:retry" {
+                        UploadQueue.shared.retryNow()
+                        return
+                    }
+                    if let tab, tab.hasPrefix("cloud:testConfig:"), bundleIdentifier.hasSuffix(".test") {
+                        // Only in the separate test copy of the app (its own bundle id, preferences and
+                        // keychain item): cloud:testConfig:<url>|<user>|<password>|<screenshotFolder>
+                        let parts = tab.dropFirst("cloud:testConfig:".count).split(separator: "|", omittingEmptySubsequences: false).map(String.init)
+                        if parts.count == 4 {
+                            Defaults[.cloudreveServerURL] = parts[0]
+                            Defaults[.cloudreveUsername] = parts[1]
+                            KeychainPassword.save(parts[2], account: parts[1])
+                            Defaults[.cloudreveScreenshotFolder] = parts[3]
+                            Defaults[.cloudreveEnabled] = true
+                            BoringViewCoordinator.shared.firstLaunch = false
+                            UploadQueue.shared.configurationChanged()
+                        }
+                        return
+                    }
+                    if tab == "shot:fake" {
+                        // A synthetic 400×200 picture through the normal after-capture path (no Screen Recording needed).
+                        let size = NSSize(width: 400, height: 200)
+                        let image = NSImage(size: size, flipped: false) { rect in
+                            NSGradient(starting: .systemIndigo, ending: .systemTeal)?.draw(in: rect, angle: 30)
+                            return true
+                        }
+                        if let tiff = image.tiffRepresentation, let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) {
+                            Task { await ScreenshotLauncher.finish(png: png, isRegion: true) }
+                        }
+                        return
+                    }
+                    if tab == "cloud:fakeJobs" {
+                        // One file and two screenshots in the queue, with matching Shelf items,
+                        // aimed at a folder no real server has. Remove them again with cloud:dropFakeJobs.
+                        Task {
+                            let q = UploadQueue.shared
+                            q.enqueue(data: Data("x".utf8), name: "__TEST__ file.txt", folder: "/__lbn_test__", kind: .file)
+                            for n in 1...2 {
+                                let name = "Screenshot __TEST__ \(n).png"
+                                if let url = await TemporaryFileStorageService.shared.createTempFile(for: .data(Data("x".utf8), suggestedName: name)),
+                                   let bookmark = try? Bookmark(url: url) {
+                                    let item = ShelfItem(kind: .file(bookmark: bookmark.data), isTemporary: true)
+                                    ShelfStateViewModel.shared.add([item])
+                                    q.enqueue(data: Data("x".utf8), name: name, folder: "/__lbn_test__", kind: .screenshot, shelfItemID: item.id)
+                                }
+                            }
+                        }
+                        return
+                    }
+                    if tab == "cloud:cancelFirstFile" {
+                        if let job = UploadQueue.shared.jobs(of: .file).first(where: { $0.fileName.contains("__TEST__") }) { UploadQueue.shared.cancel(job) }
+                        return
+                    }
+                    if tab == "cloud:cancelFirstScreenshot" {
+                        if let job = UploadQueue.shared.jobs(of: .screenshot).first { UploadQueue.shared.cancel(job) }
+                        return
+                    }
+                    if tab == "cloud:dropFakeJobs" {
+                        for job in UploadQueue.shared.jobs where job.fileName.contains("__TEST__") { UploadQueue.shared.cancel(job) }
+                        return
+                    }
+                    if tab == "cloud:status" {
+                        let q = UploadQueue.shared
+                        let text = "configured=\(CloudreveConfig.current().isConfigured) files=\(q.jobs(of: .file).count) screenshots=\(q.jobs(of: .screenshot).count) failed=\(q.failedCount) online=\(q.isOnline) uploading=\(q.isUploading) errors=\(q.jobs.compactMap(\.lastError).joined(separator: ";"))"
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(text, forType: .string)
+                        return
+                    }
+                    if tab == "cloud:shareTest" {
+                        // Pushes a small text file through the Quick Share path, as a drop on the tile would.
+                        Task {
+                            if let url = await TemporaryFileStorageService.shared.createTempFile(for: .data(Data("hello from the share tile".utf8), suggestedName: "share-test.txt")) {
+                                await QuickShareService.shared.shareFilesOrText([url], using: .cloudreve, from: nil)
+                            }
+                        }
+                        return
+                    }
+                    if tab == "shortcut:status" {
+                        let text = "enabled=\(Defaults[.screenshotShortcutEnabled]) key=\(Defaults[.screenshotShortcutKey].rawValue) inputMonitoring=\(ScreenshotShortcut.hasInputMonitoringAccess)"
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(text, forType: .string)
+                        return
+                    }
+                    if tab == "shelf:showDelete" {
+                        ShelfDebug.shared.toggleAlwaysShowDelete()
+                        return
+                    }
+                    if tab == "shelf:removeNewestScreenshot" {
+                        let shelf = ShelfStateViewModel.shared
+                        if let item = shelf.items.last(where: { $0.isTemporary && $0.displayName.hasPrefix("Screenshot ") }) {
+                            shelf.remove(item)
+                        }
+                        return
+                    }
+                    if tab == "shot:full" {
+                        ScreenshotLauncher.take(.fullScreen, on: NSScreen.main)
+                        return
+                    }
+                    if let tab, tab.hasPrefix("shot:region:") {
+                        // shot:region:x,y,w,h in points from the top-left of the main screen
+                        let v = tab.dropFirst("shot:region:".count).split(separator: ",").compactMap { Double($0) }
+                        if v.count == 4, let screen = NSScreen.main {
+                            Task { await ScreenshotLauncher.capture(screen: screen, region: CGRect(x: v[0], y: v[1], width: v[2], height: v[3])) }
+                        }
+                        return
+                    }
+                    if tab == "shot:overlay" {
+                        ScreenshotLauncher.take(.region, on: NSScreen.main)
                         return
                     }
                     if tab == "reminderAlert" {

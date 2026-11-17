@@ -576,6 +576,22 @@ extension Defaults.Keys {
     static let tabSwipeEnabled = Key<Bool>("tabSwipeEnabled", default: true)
     /// Screenshot button next to the mirror button in the open notch.
     static let screenshotButtonInNotch = Key<Bool>("screenshotButtonInNotch", default: true)
+    /// Double-pressing a modifier key starts a region screenshot, from any app.
+    static let screenshotShortcutEnabled = Key<Bool>("screenshotShortcutEnabled", default: true)
+    static let screenshotShortcutKey = Key<ShortcutModifier>("screenshotShortcutKey", default: .command)
+    /// The Input Monitoring prompt has been shown once.
+    static let screenshotShortcutAskedPermission = Key<Bool>("screenshotShortcutAskedPermission", default: false)
+    /// Screenshots from that button are also dropped onto the Shelf.
+    static let screenshotAddToShelf = Key<Bool>("screenshotAddToShelf", default: true)
+    // MARK: Cloudreve
+    static let cloudreveEnabled = Key<Bool>("cloudreveEnabled", default: false)
+    static let cloudreveDisplayName = Key<String>("cloudreveDisplayName", default: "Cloudreve")
+    static let cloudreveServerURL = Key<String>("cloudreveServerURL", default: "")
+    static let cloudreveUsername = Key<String>("cloudreveUsername", default: "")
+    /// Remote folder for files shared through the Shelf's Quick Share tile.
+    static let cloudreveSharedFolder = Key<String>("cloudreveSharedFolder", default: "/Shared")
+    static let cloudreveScreenshotFolder = Key<String>("cloudreveScreenshotFolder", default: "/Screenshots")
+    static let cloudreveUploadScreenshots = Key<Bool>("cloudreveUploadScreenshots", default: true)
     // MARK: Quick Todo
     static let quickTodoEnabled = Key<Bool>("quickTodoEnabled", default: true)
     static let quickTodoSelectedProject = Key<String>("quickTodoSelectedProject", default: "")

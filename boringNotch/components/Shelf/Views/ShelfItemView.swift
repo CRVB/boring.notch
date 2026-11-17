@@ -14,6 +14,8 @@ struct ShelfItemView: View {
     @StateObject private var viewModel: ShelfItemViewModel
     @State private var selectionState: ShelfItemSelectionState
     @State private var debouncedDropTarget = false
+    @State private var isHovering = false
+    @ObservedObject private var debug = ShelfDebug.shared
 
     private var isSelected: Bool { selectionState.isSelected }
 
@@ -100,6 +102,18 @@ struct ShelfItemView: View {
                 onContextClick: viewModel.handleRightClick
             )
         }
+        // Little Boring Notch: an × in the top-left corner while the pointer is on the item.
+        .overlay(alignment: .topLeading) {
+            if isHovering || debug.alwaysShowDelete {
+                ShelfRemoveButton { ShelfActionService.remove(item) }
+                    .padding(.leading, 3)
+                    .padding(.top, 3)
+                    .transition(.scale(scale: 0.5).combined(with: .opacity))
+            }
+        }
+        .onHover { hovering in
+            withAnimation(.easeOut(duration: 0.12)) { isHovering = hovering }
+        }
     }
 
     private var iconView: some View {
@@ -136,5 +150,41 @@ struct ShelfItemView: View {
         let fill: Color
         let stroke: Color
         let lineWidth: CGFloat
+    }
+}
+
+/// The little round × that removes an item from the Shelf.
+private struct ShelfRemoveButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "xmark")
+                .font(.system(size: 8, weight: .heavy))
+                .foregroundStyle(.white)
+                .frame(width: 18, height: 18)
+                .background(
+                    Circle()
+                        .fill(Color(white: 0.18))
+                        .overlay(Circle().strokeBorder(Color.white.opacity(0.3), lineWidth: 1))
+                        .shadow(color: .black.opacity(0.4), radius: 2, y: 1)
+                )
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .help("Remove from Shelf")
+    }
+}
+
+/// Debug-only switch that keeps the × visible, so its layout can be checked without a pointer.
+@MainActor
+final class ShelfDebug: ObservableObject {
+    static let shared = ShelfDebug()
+    @Published private(set) var alwaysShowDelete = false
+
+    func toggleAlwaysShowDelete() {
+        #if DEBUG
+        alwaysShowDelete.toggle()
+        #endif
     }
 }

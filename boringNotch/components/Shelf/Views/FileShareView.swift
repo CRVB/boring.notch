@@ -13,6 +13,7 @@ import UniformTypeIdentifiers
 struct FileShareView: View {
     let dropInteraction: DropInteractionState
     @StateObject private var quickShare = QuickShareService.shared
+    @ObservedObject private var uploads = UploadQueue.shared
     @Default(.quickShareProvider) var quickShareProvider: String
 
     @State private var hostView: NSView?
@@ -84,10 +85,19 @@ struct FileShareView: View {
                         .animation(.spring(response: 0.36, dampingFraction: 0.7), value: dropInteraction.dropZoneTargeting)
                 }
 
-                Text(selectedProvider.id)
+                Text(quickShare.displayName(for: selectedProvider.id))
                     .font(.system(.headline, design: .rounded))
                     .foregroundColor(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+
+                if selectedProvider.id == QuickShareProvider.cloudreveId, uploads.pendingCount > 0 {
+                    // Files still waiting to go up (offline, or the server can't be reached).
+                    Label("\(uploads.pendingCount)", systemImage: uploads.failedCount > 0 ? "exclamationmark.icloud" : "icloud.and.arrow.up")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(uploads.failedCount > 0 ? Color.orange : Color.gray)
+                }
             }
             .padding(18)
 

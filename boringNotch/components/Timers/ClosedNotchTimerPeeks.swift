@@ -69,6 +69,10 @@ struct NotchAlertRow: View {
         Group {
             if case .countdownFinished = alert, let notchWidth {
                 compactCountdownRow(width: notchWidth)
+            } else if case .screenshotCopied(let region, let shelved, let upload) = alert, let notchWidth {
+                screenshotRow(region: region, shelved: shelved, upload: upload, width: notchWidth)
+            } else if case .cloudUploaded(let target) = alert, let notchWidth {
+                cloudUploadedRow(target: target, width: notchWidth)
             } else {
                 fullRow
             }
@@ -114,6 +118,88 @@ struct NotchAlertRow: View {
         .padding(.horizontal, 6)
         .padding(.bottom, 10)
         .frame(width: width)
+    }
+
+    /// "Region copied" / "Screen copied", the width of the notch.
+    private func cloudUploadedRow(target: String, width: CGFloat) -> some View {
+        HStack(spacing: 7) {
+            Image(systemName: "checkmark.icloud.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.effectiveAccent)
+                .symbolEffect(.bounce, value: alert.id)
+            Text("Uploaded to \(target)")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .padding(.horizontal, 10)
+        .frame(width: width)
+        .padding(.top, 1)
+        .padding(.bottom, 9)
+    }
+
+    private func screenshotRow(region: Bool, shelved: Bool, upload: ScreenshotUploadState?, width: CGFloat) -> some View {
+        HStack(spacing: 7) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.green)
+                .symbolEffect(.bounce, value: alert.id)
+            Text(region ? "Region copied" : "Screen copied")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+            if shelved {
+                // Also saved to the Shelf.
+                Image(systemName: "tray.fill")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.effectiveAccent)
+            }
+            if let upload {
+                Capsule()
+                    .fill(Color.white.opacity(0.25))
+                    .frame(width: 1, height: 12)
+                uploadStatus(upload)
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+            }
+        }
+        .animation(.smooth(duration: 0.25), value: upload)
+        .padding(.horizontal, 10)
+        // Wider than the notch while there is an upload status to show.
+        .frame(width: upload == nil ? width : max(width, 290))
+        .padding(.top, 1)
+        .padding(.bottom, 9)
+    }
+
+    @ViewBuilder
+    private func uploadStatus(_ state: ScreenshotUploadState) -> some View {
+        switch state {
+        case .uploading:
+            HStack(spacing: 6) {
+                DotMatrixLoader(size: 15, color: Color.effectiveAccent)
+                Text("Uploading")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.85))
+            }
+        case .uploaded:
+            HStack(spacing: 5) {
+                Image(systemName: "checkmark.icloud.fill")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.effectiveAccent)
+                Text("Uploaded")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+        case .failed:
+            HStack(spacing: 5) {
+                Image(systemName: "exclamationmark.icloud.fill")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.orange)
+                Text("Upload failed")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+        }
     }
 
     private var fullRow: some View {
@@ -172,13 +258,15 @@ struct NotchAlertRow: View {
         switch alert {
         case .reminder: return "bell.fill"
         case .countdownFinished: return "timer"
+        case .screenshotCopied: return "camera.viewfinder"
+        case .cloudUploaded: return "checkmark.icloud.fill"
         }
     }
 
     private var iconColor: Color {
         switch alert {
         case .reminder(let item): return item.color.map { Color(cgColor: $0) } ?? .orange
-        case .countdownFinished: return .orange
+        case .countdownFinished, .screenshotCopied, .cloudUploaded: return .orange
         }
     }
 
@@ -186,6 +274,8 @@ struct NotchAlertRow: View {
         switch alert {
         case .reminder(let item): return item.title
         case .countdownFinished: return String(localized: "Time's up")
+        case .screenshotCopied(let region, _, _): return region ? String(localized: "Region copied") : String(localized: "Screen copied")
+        case .cloudUploaded(let target): return String(localized: "Uploaded to \(target)")
         }
     }
 
@@ -196,13 +286,17 @@ struct NotchAlertRow: View {
             return item.listTitle.isEmpty ? time : "\(item.listTitle) · \(time)"
         case .countdownFinished(let duration):
             return String(localized: "\(duration.countdownString) countdown finished")
+        case .screenshotCopied:
+            return String(localized: "Copied to the clipboard")
+        case .cloudUploaded:
+            return ""
         }
     }
 
     private var secondaryTitle: LocalizedStringKey {
         switch alert {
         case .reminder: return "Snooze \(Defaults[.reminderSnoozeMinutes]) min"
-        case .countdownFinished: return "Restart"
+        case .countdownFinished, .screenshotCopied, .cloudUploaded: return "Restart"
         }
     }
 }

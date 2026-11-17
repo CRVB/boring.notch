@@ -88,10 +88,30 @@ struct TabSwipeMonitor: NSViewRepresentable {
         private var monitor: Any?
         private var accumulated: CGFloat = 0
         private var firedThisTouch = false
+        /// The touch began over something that scrolls sideways itself (the calendar's
+        /// days, the Shelf): that scrolling is meant for it, not for switching tabs.
+        private var blockedByScroller = false
 
         init(threshold: CGFloat, onSwipe: @escaping (Int) -> Void) {
             self.threshold = threshold
             self.onSwipe = onSwipe
+        }
+
+        /// Whether the view under `point` (window coordinates) sits inside an
+        /// `NSScrollView` whose content is wider than what it shows.
+        static func isOverHorizontalScroller(in window: NSWindow, at point: NSPoint) -> Bool {
+            guard let content = window.contentView else { return false }
+            let local = content.superview?.convert(point, from: nil) ?? point
+            var view = content.hitTest(local)
+            while let current = view {
+                if let scroll = current as? NSScrollView,
+                   let document = scroll.documentView,
+                   document.frame.width > scroll.contentView.bounds.width + 1 {
+                    return true
+                }
+                view = current.superview
+            }
+            return false
         }
 
         func install(on view: NSView) {
@@ -117,13 +137,17 @@ struct TabSwipeMonitor: NSViewRepresentable {
             if event.phase.contains(.began) || event.phase.contains(.mayBegin) {
                 accumulated = 0
                 firedThisTouch = false
+                if let window = event.window {
+                    blockedByScroller = Self.isOverHorizontalScroller(in: window, at: event.locationInWindow)
+                }
             }
             if event.phase.contains(.ended) || event.phase.contains(.cancelled) {
                 accumulated = 0
                 firedThisTouch = false
+                blockedByScroller = false
                 return
             }
-            guard event.phase.contains(.changed), !firedThisTouch else { return }
+            guard event.phase.contains(.changed), !firedThisTouch, !blockedByScroller else { return }
 
             let dx = event.scrollingDeltaX
             let dy = event.scrollingDeltaY

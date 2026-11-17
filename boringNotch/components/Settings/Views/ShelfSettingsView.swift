@@ -63,7 +63,7 @@ struct ShelfSettingsView: View {
                             }
                             .frame(width: 16, height: 16)
                             .foregroundColor(.accentColor)
-                            Text(provider.id)
+                            Text(quickShareService.displayName(for: provider.id))
                         }
                         .tag(provider.id)
                     }
@@ -83,7 +83,7 @@ struct ShelfSettingsView: View {
                         .frame(width: 16, height: 16)
                         .foregroundColor(.accentColor)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Currently selected: \(selectedProvider.id)")
+                            Text("Currently selected: \(quickShareService.displayName(for: selectedProvider.id))")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Text("Files dropped on the shelf will be shared via this service")

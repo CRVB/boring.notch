@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import Defaults
 import Foundation
 import UniformTypeIdentifiers
 
@@ -14,6 +15,9 @@ struct QuickShareProvider: Identifiable, Hashable, Sendable {
     static let airDropId = "AirDrop"
     static let systemShareMenuId = "System Share Menu"
     static let systemShareMenu = QuickShareProvider(id: systemShareMenuId, supportsRawText: true)
+    /// Little Boring Notch: uploads to the Cloudreve server set up in Settings.
+    static let cloudreveId = "Cloudreve"
+    static let cloudreve = QuickShareProvider(id: cloudreveId, supportsRawText: true)
 
     var id: String
     var supportsRawText: Bool
@@ -131,6 +135,12 @@ final class QuickShareService: ObservableObject {
 
         warmApplicationIconCacheIfNeeded()
 
+        if providerId == QuickShareProvider.cloudreveId {
+            let symbol = NSImage(systemSymbolName: "icloud.and.arrow.up", accessibilityDescription: "Cloudreve")
+            symbol?.isTemplate = true
+            return symbol
+        }
+
         // For system share menu, return a generic share icon
         if providerId == QuickShareProvider.systemShareMenuId {
             return NSImage(systemSymbolName: "square.and.arrow.up", accessibilityDescription: "Share")
@@ -207,7 +217,28 @@ final class QuickShareService: ObservableObject {
         }
 
         availableProviders = providers
+        refreshCloudreveProvider()
         warmApplicationIconCacheIfNeeded()
+    }
+
+    /// Lists Cloudreve first while it is switched on, and drops it again when it is switched off.
+    @MainActor
+    func refreshCloudreveProvider() {
+        var providers = availableProviders.filter { $0.id != QuickShareProvider.cloudreveId }
+        if Defaults[.cloudreveEnabled] {
+            providers.insert(.cloudreve, at: 0)
+        }
+        if providers != availableProviders {
+            availableProviders = providers
+        }
+    }
+
+    /// What the Shelf tile and the settings list call a provider.
+    @MainActor
+    func displayName(for providerId: String) -> String {
+        guard providerId == QuickShareProvider.cloudreveId else { return providerId }
+        let name = Defaults[.cloudreveDisplayName].trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? "Cloudreve" : name
     }
 
     // MARK: - File Picker
@@ -248,6 +279,10 @@ final class QuickShareService: ObservableObject {
     // MARK: - Sharing
     @MainActor
     func shareFilesOrText(_ items: [Any], using provider: QuickShareProvider, from view: NSView?) async {
+        if provider.id == QuickShareProvider.cloudreveId {
+            await uploadToCloudreve(items)
+            return
+        }
         let fileURLs = items.compactMap { $0 as? URL }.filter { $0.isFileURL }
         // Stop any previous sharing access
         stopSharingAccessingURLs()
@@ -272,6 +307,45 @@ final class QuickShareService: ObservableObject {
             delegate.markPickerBegan()
             if let view {
                 picker.show(relativeTo: .zero, of: view, preferredEdge: .minY)
+            }
+        }
+    }
+
+    /// Queues files, folders (zipped), links and text for upload to Cloudreve.
+    @MainActor
+    private func uploadToCloudreve(_ items: [Any]) async {
+        guard CloudreveConfig.current().isConfigured else {
+            // Nothing to upload to yet: take the user to the settings.
+            NSSound.beep()
+            SettingsWindowController.shared.showWindow()
+            return
+        }
+        let folder = Defaults[.cloudreveSharedFolder]
+        let storage = TemporaryFileStorageService.shared
+
+        for item in items {
+            if let url = item as? URL, url.isFileURL {
+                let scoped = url.startAccessingSecurityScopedResource()
+                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+                var isDirectory: ObjCBool = false
+                if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue {
+                    if let zip = await storage.createZip(from: [url], suggestedName: url.lastPathComponent) {
+                        UploadQueue.shared.enqueue(fileURL: zip, folder: folder)
+                        storage.removeTemporaryFileIfNeeded(at: zip)
+                    }
+                } else {
+                    UploadQueue.shared.enqueue(fileURL: url, folder: folder)
+                }
+            } else if let url = item as? URL {
+                if let webloc = await storage.createTempFile(for: .url(url)) {
+                    UploadQueue.shared.enqueue(fileURL: webloc, folder: folder)
+                    storage.removeTemporaryFileIfNeeded(at: webloc)
+                }
+            } else if let text = (item as? String) ?? (item as? NSString) as String? {
+                if let file = await storage.createTempFile(for: .text(text)) {
+                    UploadQueue.shared.enqueue(fileURL: file, folder: folder)
+                    storage.removeTemporaryFileIfNeeded(at: file)
+                }
             }
         }
     }
