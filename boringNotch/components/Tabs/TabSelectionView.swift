@@ -5,6 +5,7 @@
 //  Created by Hugo Persson on 2024-08-25.
 //
 
+import Defaults
 import SwiftUI
 
 struct TabModel: Identifiable {
@@ -14,21 +15,33 @@ struct TabModel: Identifiable {
     let view: NotchViews
 }
 
-let tabs = [
-    TabModel(label: "Home", icon: "house.fill", view: .home),
-    TabModel(label: "Shelf", icon: "tray.fill", view: .shelf)
-]
+/// Tabs currently offered in the open notch; a tab disappears with its feature.
+var tabs: [TabModel] {
+    var result = [TabModel(label: "Home", icon: "house.fill", view: .home)]
+    if Defaults[.boringShelf] {
+        result.append(TabModel(label: "Shelf", icon: "tray.fill", view: .shelf))
+    }
+    if Defaults[.timersEnabled] {
+        result.append(TabModel(label: "Timers", icon: "timer", view: .timers))
+    }
+    if Defaults[.quickTodoEnabled] {
+        result.append(TabModel(label: "Quick Todo", icon: "checklist", view: .todo))
+    }
+    return result
+}
 
 struct TabSelectionView: View {
     @ObservedObject var coordinator = BoringViewCoordinator.shared
+    @Default(.boringShelf) private var boringShelf
+    @Default(.timersEnabled) private var timersEnabled
+    @Default(.quickTodoEnabled) private var quickTodoEnabled
     @Namespace var animation
+
     var body: some View {
         HStack(spacing: 0) {
             ForEach(tabs) { tab in
                     TabButton(label: tab.label, icon: tab.icon, selected: coordinator.currentView == tab.view) {
-                        withAnimation(.smooth) {
-                            coordinator.currentView = tab.view
-                        }
+                        TabTransitionState.shared.select(tab.view)
                     }
                     .frame(height: 26)
                     .foregroundStyle(tab.view == coordinator.currentView ? .white : .gray)

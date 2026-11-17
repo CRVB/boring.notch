@@ -25,6 +25,14 @@ enum CalendarSelectionState: Codable, Defaults.Serializable {
     case selected(Set<String>)
 }
 
+enum CountdownPeekMode: String, CaseIterable, Identifiable, Defaults.Serializable {
+    case keyMoments
+    case always
+    case never
+
+    var id: Self { self }
+}
+
 enum HideNotchOption: String, Defaults.Serializable {
     case always
     case nowPlayingOnly
@@ -546,6 +554,31 @@ extension Defaults.Keys {
     static let calendarWeekView = Key<Bool>("calendarWeekView", default: false)
     static let weekStartDay = Key<WeekStartDay>("weekStartDay", default: .system)
     static let joinMeetingOnEventTap = Key<Bool>("joinMeetingOnEventTap", default: true)
+
+    // MARK: Timers & Reminders
+    static let timersEnabled = Key<Bool>("timersEnabled", default: true)
+    /// Countdown quick-start presets, in minutes.
+    static let countdownPresets = Key<[Int]>("countdownPresets", default: [5, 15, 25])
+    static let countdownLastDuration = Key<Int>("countdownLastDuration", default: 25 * 60)
+    static let countdownPlaySound = Key<Bool>("countdownPlaySound", default: true)
+    /// Reminders list new reminders are saved to; empty means the system default list.
+    static let reminderTargetListID = Key<String>("reminderTargetListID", default: "")
+    static let remindersShowUndated = Key<Bool>("remindersShowUndated", default: true)
+    static let remindersAddAlarm = Key<Bool>("remindersAddAlarm", default: true)
+    /// When the running countdown shows under the closed notch.
+    static let countdownPeekMode = Key<CountdownPeekMode>("countdownPeekMode", default: .keyMoments)
+    /// Drop down a "Done" alert under the notch when a reminder is due or the countdown ends.
+    static let notchAlertsEnabled = Key<Bool>("notchAlertsEnabled", default: true)
+    static let reminderSnoozeMinutes = Key<Int>("reminderSnoozeMinutes", default: 10)
+    /// How long a due-reminder alert stays under the notch before sliding away.
+    static let reminderAlertSeconds = Key<Int>("reminderAlertSeconds", default: 8)
+    /// Two-finger horizontal swipe switches between the open notch's tabs.
+    static let tabSwipeEnabled = Key<Bool>("tabSwipeEnabled", default: true)
+    /// Screenshot button next to the mirror button in the open notch.
+    static let screenshotButtonInNotch = Key<Bool>("screenshotButtonInNotch", default: true)
+    // MARK: Quick Todo
+    static let quickTodoEnabled = Key<Bool>("quickTodoEnabled", default: true)
+    static let quickTodoSelectedProject = Key<String>("quickTodoSelectedProject", default: "")
 
     // MARK: Fullscreen Media Detection
     static let hideNotchOption = Key<HideNotchOption>("hideNotchOption", default: .nowPlayingOnly)

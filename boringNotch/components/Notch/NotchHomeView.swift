@@ -557,9 +557,9 @@ struct NotchHomeView: View {
     let horizontalMediaGestureFeedback: CGFloat
     @Binding var isHoveringMusicArea: Bool
 
+    // Little Boring Notch: no own transition here, so the tab slide applies.
     var body: some View {
         mainContent
-            .transition(.opacity)
     }
 
     private var shouldShowCamera: Bool {
@@ -592,7 +592,6 @@ struct NotchHomeView: View {
                 
             }
         }
-        .transition(.opacity)
         .blur(radius: vm.notchState == .closed ? 30 : 0)
     }
 }

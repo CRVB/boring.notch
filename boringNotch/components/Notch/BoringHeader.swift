@@ -13,10 +13,16 @@ struct BoringHeader: View {
     @ObservedObject var batteryModel = BatteryStatusViewModel.shared
     @ObservedObject var coordinator = BoringViewCoordinator.shared
     @StateObject var shelfState = ShelfStateViewModel.shared
+
+    private var showsTabs: Bool {
+        ((!shelfState.isEmpty || coordinator.alwaysShowTabs) && Defaults[.boringShelf])
+            || Defaults[.timersEnabled] || Defaults[.quickTodoEnabled]
+    }
+
     var body: some View {
         HStack(spacing: 0) {
             HStack {
-                if (!shelfState.isEmpty || coordinator.alwaysShowTabs) && Defaults[.boringShelf] {
+                if showsTabs {
                     TabSelectionView()
                 } else if vm.notchState == .open {
                     EmptyView()
@@ -47,6 +53,25 @@ struct BoringHeader: View {
                         )
                             .transition(.scale(scale: 0.8).combined(with: .opacity))
                     } else {
+                        if Defaults[.screenshotButtonInNotch] {
+                            // Little Boring Notch: screenshot straight to the clipboard.
+                            Button(action: {
+                                vm.close()
+                                ScreenshotLauncher.open(on: vm.screenUUID.flatMap { NSScreen.screen(withUUID: $0) })
+                            }) {
+                                Capsule()
+                                    .fill(.black)
+                                    .frame(width: 30, height: 30)
+                                    .overlay {
+                                        Image(systemName: "camera.viewfinder")
+                                            .foregroundColor(.white)
+                                            .padding()
+                                            .imageScale(.medium)
+                                    }
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .help("Copy a screenshot to the clipboard")
+                        }
                         if Defaults[.showMirror] && coordinator.currentView == .home {
                             Button(action: {
                                 vm.toggleCameraPreview()

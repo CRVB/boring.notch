@@ -280,6 +280,51 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        // Start watching Reminders now, so due alerts fire even if the Timers tab never opened.
+        if Defaults[.timersEnabled] {
+            _ = ReminderManager.shared
+        }
+
+        #if DEBUG
+        // Debug-only hook so the notch can be driven from a script while testing:
+        //   post "com.crvb.littleboringnotch.debug.showTab" with object home|shelf|timers|close
+        DistributedNotificationCenter.default().addObserver(
+            forName: NSNotification.Name("com.crvb.littleboringnotch.debug.showTab"),
+            object: nil, queue: .main) { [weak self] notification in
+                let tab = notification.object as? String
+                Task { @MainActor in
+                    guard let self else { return }
+                    if tab == "close" {
+                        self.vm.close()
+                        return
+                    }
+                    if tab == "reminderAlert" {
+                        NotchAlertCenter.shared.post(.reminder(ReminderItem(
+                            id: "debug-\(UUID().uuidString)", title: "Test reminder", dueDate: .now,
+                            hasTime: true, isCompleted: false, listTitle: "Debug", color: nil)))
+                        return
+                    }
+                    if let tab, tab.hasPrefix("countdown:"), let seconds = Double(tab.dropFirst("countdown:".count)) {
+                        CountdownTimerManager.shared.start(duration: seconds)
+                        return
+                    }
+                    let target: NotchViews
+                    switch tab {
+                    case "home": target = .home
+                    case "shelf": target = .shelf
+                    case "todo": target = .todo
+                    default: target = .timers
+                    }
+                    if self.vm.notchState == .open {
+                        TabTransitionState.shared.select(target)
+                    } else {
+                        _ = self.vm.open()
+                        self.coordinator.currentView = target
+                    }
+                }
+        }
+        #endif
+
         KeyboardShortcuts.onKeyDown(for: .toggleNotchOpen) { [weak self] in
             Task { [weak self] in
                 guard let self = self else { return }

@@ -91,6 +91,8 @@ final class BoringViewCoordinator: ObservableObject {
     private var accessibilityObserver: Any?
     private var osdReplacementCancellable: AnyCancellable?
     private var boringShelfCancellable: AnyCancellable?
+    private var timersEnabledCancellable: AnyCancellable?
+    private var quickTodoEnabledCancellable: AnyCancellable?
     private var osdSourceCancellables: [AnyCancellable] = []
     private var notificationLiveActivityCancellable: AnyCancellable?
     private var uiEventCancellable: AnyCancellable?
@@ -183,6 +185,24 @@ final class BoringViewCoordinator: ObservableObject {
             Defaults.publisher(.osdBrightnessSource).sink { [weak self] _ in Task { @MainActor in self?.applyOSDSources() } },
             Defaults.publisher(.osdVolumeSource).sink { [weak self] _ in Task { @MainActor in self?.applyOSDSources() } }
         ]
+        timersEnabledCancellable = Defaults.publisher(.timersEnabled)
+            .sink { [weak self] change in
+                Task { @MainActor in
+                    guard let self = self else { return }
+                    if !change.newValue && self.currentView == .timers {
+                        self.currentView = .home
+                    }
+                }
+            }
+        quickTodoEnabledCancellable = Defaults.publisher(.quickTodoEnabled)
+            .sink { [weak self] change in
+                Task { @MainActor in
+                    guard let self = self else { return }
+                    if !change.newValue && self.currentView == .todo {
+                        self.currentView = .home
+                    }
+                }
+            }
         boringShelfCancellable = Defaults.publisher(.boringShelf)
             .sink { [weak self] change in
                 Task { @MainActor in

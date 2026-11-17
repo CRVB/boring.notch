@@ -25,4 +25,5 @@ enum Log {
     static let webcam = Logger(subsystem: subsystem, category: "webcam")
     static let calendar = Logger(subsystem: subsystem, category: "calendar")
     static let window = Logger(subsystem: subsystem, category: "window")
+    static let timers = Logger(subsystem: subsystem, category: "timers")
 }

@@ -22,6 +22,9 @@ struct ContentView: View {
     @ObservedObject var brightnessManager = BrightnessManager.shared
     @ObservedObject var volumeManager = VolumeManager.shared
     @ObservedObject var notificationManager = SystemNotificationManager.shared
+    @ObservedObject var countdownTimer = CountdownTimerManager.shared
+    @ObservedObject var notchAlerts = NotchAlertCenter.shared
+    @ObservedObject var tabTransition = TabTransitionState.shared
     /// Which entry of the closed-notch activity stack is on top.
     @State private var activityIndex: Int = 0
     @State private var hoverTask: Task<Void, Never>?
@@ -222,6 +225,20 @@ struct ContentView: View {
         return chinWidth
     }
 
+    /// Alert waiting under the closed notch, if any.
+    private var closedNotchAlert: NotchAlert? {
+        guard vm.notchState == .closed, !vm.hideOnClosed, !coordinator.helloAnimationRunning else { return nil }
+        return notchAlerts.current
+    }
+
+    private var showsCountdownPeek: Bool {
+        vm.notchState == .closed
+            && !vm.hideOnClosed
+            && !coordinator.helloAnimationRunning
+            && countdownTimer.peekVisible
+            && Defaults[.timersEnabled]
+    }
+
     private var shouldDisplayNowPlayingFallbackNotice: Bool {
         vm.notchState == .closed && nowPlayingFallbackNoticeActive
     }
@@ -264,7 +281,10 @@ struct ContentView: View {
                         .horizontal,
                         vm.notchState == .open ? openedInsets.top : cornerRadiusInsets.closed.bottom
                     )
-                    .padding([.horizontal, .bottom], vm.notchState == .open ? 12 : 0)
+                    // Little Boring Notch: the same visible gap at the sides and the
+                    // bottom (measured on the Shelf). Compact mode keeps upstream's 12.
+                    .padding(.horizontal, vm.notchState == .open ? (Defaults[.compactMode] ? 12 : 9) : 0)
+                    .padding(.bottom, vm.notchState == .open ? (Defaults[.compactMode] ? 12 : 9) : 0)
                     .background(.black)
                     .clipShape(currentNotchShape)
                           .overlay(alignment: .top) {
@@ -306,7 +326,7 @@ struct ContentView: View {
                         handleHover(hovering)
                     }
                     .onTapGesture {
-                        if vm.notchState == .closed && !shouldDisplayNowPlayingFallbackNotice {
+                        if vm.notchState == .closed && !shouldDisplayNowPlayingFallbackNotice && closedNotchAlert == nil {
                             doOpen()
                         }
                     }
@@ -321,6 +341,9 @@ struct ContentView: View {
                             .panGesture(direction: .up) { translation, phase in
                                 handleUpGesture(translation: translation, phase: phase)
                             }
+                    }
+                    .conditionalModifier(Defaults[.tabSwipeEnabled] && Defaults[.enableGestures]) { view in
+                        view.background(TabSwipeMonitor { step in handleTabSwipe(step: step) })
                     }
                     .conditionalModifier(Defaults[.enableHorizontalMediaGestures] && Defaults[.enableGestures] && !shouldDisplayNowPlayingFallbackNotice) { view in
                         view
@@ -510,10 +533,19 @@ struct ContentView: View {
                                    .padding(.bottom, 10)
                                }
                            }
+                       } else if let alert = closedNotchAlert {
+                           // Little Boring Notch: waits for "Done" under the notch.
+                           NotchAlertRow(alert: alert, notchWidth: computedChinWidth)
+                               .transition(.opacity.combined(with: .move(edge: .top)))
+                       } else if showsCountdownPeek {
+                           // Sits where the song-change peek does; a song change
+                           // briefly takes the spot, then the countdown returns.
+                           CountdownPeekRow(width: computedChinWidth)
+                               .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .top)))
                        }
                         }
                       }
-                      .conditionalModifier((coordinator.shouldShowSneakPeek(on: vm.screenUUID) && (coordinator.sneakPeekState(for: vm.screenUUID).type == .music) && vm.notchState == .closed && !vm.hideOnClosed && Defaults[.sneakPeekStyles] == .standard) || (coordinator.shouldShowSneakPeek(on: vm.screenUUID) && (coordinator.sneakPeekState(for: vm.screenUUID).type != .music) && (vm.notchState == .closed))) { view in
+                      .conditionalModifier((coordinator.shouldShowSneakPeek(on: vm.screenUUID) && (coordinator.sneakPeekState(for: vm.screenUUID).type == .music) && vm.notchState == .closed && !vm.hideOnClosed && Defaults[.sneakPeekStyles] == .standard) || (coordinator.shouldShowSneakPeek(on: vm.screenUUID) && (coordinator.sneakPeekState(for: vm.screenUUID).type != .music) && (vm.notchState == .closed)) || (!coordinator.shouldShowSneakPeek(on: vm.screenUUID) && (closedNotchAlert != nil || showsCountdownPeek))) { view in
                           view
                               .fixedSize()
                       }
@@ -544,6 +576,7 @@ struct ContentView: View {
                             isHoveringMusicArea = false
                         }
                     } else {
+                        Group {
                         switch coordinator.currentView {
                         case .home:
                             NotchHomeView(
@@ -556,7 +589,15 @@ struct ContentView: View {
                                 dropInteraction: vm.dropInteraction,
                                 animation: vm.animation
                             )
+                        case .timers:
+                            TimersView()
+                        case .todo:
+                            QuickTodoView()
                         }
+                        }
+                        // Little Boring Notch: pages slide in from the side of their tab.
+                        .id(coordinator.currentView)
+                        .transition(tabTransition.transition)
                     }
                 }
                 .transition(
@@ -844,6 +885,7 @@ extension ContentView {
             guard vm.notchState == .closed,
                   !shouldDisplayNowPlayingFallbackNotice,
                   !coordinator.shouldShowSneakPeek(on: vm.screenUUID),
+                  closedNotchAlert == nil,
                   Defaults[.openNotchOnHover] else { return }
 
             hoverTask = Task {
@@ -854,7 +896,8 @@ extension ContentView {
                     guard self.vm.notchState == .closed,
                           self.isHovering,
                           !self.shouldDisplayNowPlayingFallbackNotice,
-                          !self.coordinator.shouldShowSneakPeek(on: self.vm.screenUUID) else { return }
+                          !self.coordinator.shouldShowSneakPeek(on: self.vm.screenUUID),
+                          self.closedNotchAlert == nil else { return }
 
                     self.doOpen()
                 }
@@ -944,6 +987,26 @@ extension ContentView {
     private func handlePreviousTrackGesture(translation: CGFloat, phase: NSEvent.Phase) {
         handleHorizontalMediaGesture(translation: translation, phase: phase, feedback: 1) {
             musicManager.previousTrack()
+        }
+    }
+
+    /// Two-finger swipe across the open notch moves one tab (Little Boring
+    /// Notch). Skipped while the pointer is on the player with media swipes on.
+    private func handleTabSwipe(step: Int) {
+        guard Defaults[.tabSwipeEnabled],
+              vm.notchState == .open,
+              showsHeader,
+              !(Defaults[.enableHorizontalMediaGestures] && isHorizontalMediaGestureContext) else { return }
+
+        let available = tabs.map(\.view)
+        guard let index = available.firstIndex(of: coordinator.currentView) else { return }
+        let target = index + step
+        guard available.indices.contains(target) else { return }
+
+        tabTransition.select(available[target])
+        if Defaults[.enableHaptics] {
+            // A firm trackpad click — the SwiftUI .alignment feedback is barely noticeable.
+            NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
         }
     }
 

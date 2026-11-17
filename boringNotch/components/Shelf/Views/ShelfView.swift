@@ -58,6 +58,9 @@ struct ShelfView: View {
                 }
             }
             .transaction { transaction in
+                // Little Boring Notch: keep the tab slide's own curve, or the panel
+                // springs on its own and wobbles while the page slides.
+                guard transaction.animation != TabTransitionState.animation else { return }
                 transaction.animation = animation
             }
     }
