@@ -80,12 +80,16 @@ struct DynamicNotchApp: App {
                 }
                 NSLog("Failed to migrate legacy Boring Notch app bundle at %@", sourceURL.path)
             }
-            updaterController.startUpdater()
+            // Little Boring Notch: automatic updates are disabled until this fork
+            // ships its own signed appcast. Upstream feeds would replace this build.
+            if softwareUpdatesEnabled {
+                updaterController.startUpdater()
+            }
         }
     }
 
     var body: some Scene {
-        MenuBarExtra("boring.notch", systemImage: "sparkle", isInserted: $showMenuBarIcon) {
+        MenuBarExtra("Little Boring Notch", systemImage: "sparkle", isInserted: $showMenuBarIcon) {
             Button("Settings") {
                 DispatchQueue.main.async {
                     SettingsWindowController.shared.showWindow()
@@ -93,7 +97,7 @@ struct DynamicNotchApp: App {
             }
             .keyboardShortcut(KeyEquivalent(","), modifiers: .command)
             CheckForUpdatesView(updater: updaterController.updater)
-            Button("Restart Boring Notch") {
+            Button("Restart Little Boring Notch") {
                 ApplicationRelauncher.restart()
             }
             Button("Quit", role: .destructive) {

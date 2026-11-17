@@ -11,7 +11,9 @@ import Defaults
 // MARK: - File System Paths
 let documentsDirectory: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
     ?? URL(fileURLWithPath: NSTemporaryDirectory())
-let bundleIdentifier: String = Bundle.main.bundleIdentifier ?? "theboringteam.boringnotch"
+let bundleIdentifier: String = Bundle.main.bundleIdentifier ?? "com.crvb.littleboringnotch"
+/// Sparkle updates stay off until the fork publishes its own signed appcast.
+let softwareUpdatesEnabled = false
 let appVersion = "\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "") (\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""))"
 
 let temporaryDirectory: URL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
