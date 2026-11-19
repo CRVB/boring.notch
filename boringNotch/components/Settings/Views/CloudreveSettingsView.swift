@@ -82,8 +82,8 @@ struct CloudreveSettingsView: View {
         .formStyle(.grouped)
         .accentColor(.effectiveAccent)
         .navigationTitle("Cloudreve")
-        .onAppear {
-            hasSavedPassword = KeychainPassword.read(account: username) != nil
+        .task(id: username) {
+            hasSavedPassword = await KeychainPassword.readAsync(account: username) != nil
         }
         .confirmationDialog(
             clearingKind == .screenshot ? "Cancel all waiting screenshot uploads?" : "Cancel all waiting file uploads?",

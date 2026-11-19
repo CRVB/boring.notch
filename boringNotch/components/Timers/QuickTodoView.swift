@@ -137,11 +137,12 @@ private struct ProjectChip: View {
                     withAnimation(.smooth) { store.deleteProject(project.id) }
                 }
             } else {
-                Text(project.name)
-                    .font(.system(size: 11, weight: selected ? .semibold : .regular))
-                    .foregroundStyle(selected ? .white : .gray)
-                    .lineLimit(1)
-                Spacer(minLength: 4)
+                HoverScrollText(
+                    text: project.name,
+                    font: .system(size: 11, weight: selected ? .semibold : .regular),
+                    color: selected ? .white : .gray,
+                    isHovering: isHovering
+                )
                 ProgressRing(value: project.progress, complete: project.countedItems > 0 && project.progress >= 1)
                 Text("\(project.doneCount)/\(project.countedItems)")
                     .font(.system(size: 10, weight: .medium))
@@ -376,7 +377,8 @@ private struct TodoRow: View {
     @State private var isHovering = false
 
     var body: some View {
-        HStack(spacing: 9) {
+        // Top-aligned: a long task wraps onto more lines while the status icon stays by the first one.
+        HStack(alignment: .top, spacing: 9) {
             Button(action: onPickStatus) {
                 Image(systemName: item.state.symbol)
                     .font(.system(size: 13, weight: .medium))
@@ -392,10 +394,12 @@ private struct TodoRow: View {
                 .font(.system(size: 11))
                 .strikethrough(item.state.isClosed, color: .gray)
                 .foregroundStyle(item.state.isClosed ? Color.gray : .white)
-                .lineLimit(1)
-                .truncationMode(.tail)
-
-            Spacer(minLength: 4)
+                .multilineTextAlignment(.leading)
+                .lineLimit(8)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                // Line up the first line with the 18-pt status icon.
+                .padding(.top, 2)
 
             if isHovering {
                 Button(action: onDelete) {
@@ -407,6 +411,7 @@ private struct TodoRow: View {
                 }
                 .buttonStyle(.plain)
                 .help("Delete task")
+                .padding(.top, 1)
             }
         }
         .padding(.vertical, 3)
@@ -414,3 +419,74 @@ private struct TodoRow: View {
         .onHover { isHovering = $0 }
     }
 }
+
+/// One line of text that shows its end by sliding sideways while the pointer is on
+/// it; otherwise (or when it fits) it is an ordinary line, cut off with "…".
+private struct HoverScrollText: View {
+    let text: String
+    let font: Font
+    let color: Color
+    let isHovering: Bool
+
+    @State private var naturalWidth: CGFloat = 0
+    @State private var availableWidth: CGFloat = 0
+    @State private var offset: CGFloat = 0
+    @ObservedObject private var debugFlags = NotchDebugFlags.shared
+
+    private var overflow: CGFloat { max(0, naturalWidth - availableWidth) }
+    private var isSliding: Bool { (isHovering || debugFlags.forceHoverScroll) && overflow > 0 }
+
+    var body: some View {
+        // The layout is always decided by the cut-off line, so the box never changes size.
+        // While sliding, the full text is drawn on top of it (an overlay takes no room)
+        // and clipped to that same box.
+        Text(text)
+            .font(font)
+            .foregroundStyle(color)
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .opacity(isSliding ? 0 : 1)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(alignment: .leading) {
+                if isSliding {
+                    Text(text)
+                        .font(font)
+                        .foregroundStyle(color)
+                        .lineLimit(1)
+                        .fixedSize()
+                        .offset(x: offset)
+                }
+            }
+            .clipped()
+        // The room this text is given.
+        .background(GeometryReader { geometry in
+            Color.clear
+                .onAppear { availableWidth = geometry.size.width }
+                .onChange(of: geometry.size.width) { _, width in availableWidth = width }
+        })
+        // The width the whole text would need.
+        .background(
+            Text(text)
+                .font(font)
+                .lineLimit(1)
+                .fixedSize()
+                .hidden()
+                .background(GeometryReader { geometry in
+                    Color.clear
+                        .onAppear { naturalWidth = geometry.size.width }
+                        .onChange(of: geometry.size.width) { _, width in naturalWidth = width }
+                })
+        )
+        .task(id: isSliding) {
+            if isSliding {
+                // A moment to start reading, then a steady slide to the end of the text.
+                try? await Task.sleep(for: .milliseconds(350))
+                guard !Task.isCancelled else { return }
+                withAnimation(.linear(duration: max(0.8, Double(overflow) / 45))) { offset = -overflow }
+            } else {
+                withAnimation(.easeOut(duration: 0.2)) { offset = 0 }
+            }
+        }
+    }
+}
+

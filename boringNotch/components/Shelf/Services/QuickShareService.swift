@@ -322,6 +322,7 @@ final class QuickShareService: ObservableObject {
         }
         let folder = Defaults[.cloudreveSharedFolder]
         let storage = TemporaryFileStorageService.shared
+        defer { NotificationCenter.default.post(name: .cloudreveFilesQueued, object: items.count) }
 
         for item in items {
             if let url = item as? URL, url.isFileURL {

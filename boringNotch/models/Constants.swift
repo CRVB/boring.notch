@@ -579,6 +579,8 @@ extension Defaults.Keys {
     /// Double-pressing a modifier key starts a region screenshot, from any app.
     static let screenshotShortcutEnabled = Key<Bool>("screenshotShortcutEnabled", default: true)
     static let screenshotShortcutKey = Key<ShortcutModifier>("screenshotShortcutKey", default: .command)
+    /// What two presses do; three presses do the other one.
+    static let screenshotShortcutTwoPresses = Key<ShortcutScreenshotMode>("screenshotShortcutTwoPresses", default: .region)
     /// The Input Monitoring prompt has been shown once.
     static let screenshotShortcutAskedPermission = Key<Bool>("screenshotShortcutAskedPermission", default: false)
     /// Screenshots from that button are also dropped onto the Shelf.

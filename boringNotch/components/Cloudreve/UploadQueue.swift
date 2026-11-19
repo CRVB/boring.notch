@@ -14,12 +14,26 @@
 import AppKit
 import Foundation
 import Network
+import SwiftUI
 
 enum UploadKind: String, Codable {
     /// A file, folder, link or text sent through the Shelf's Quick Share tile.
     case file
     /// A screenshot taken with the notch's screenshot button.
     case screenshot
+}
+
+/// What the Shelf's Cloudreve tile shows about the files dropped on it.
+enum ShareStatus: Equatable {
+    case idle
+    case uploading
+    case uploaded
+    case failed
+}
+
+extension Notification.Name {
+    /// Files were queued for Cloudreve through the Quick Share path (the object is the count).
+    static let cloudreveFilesQueued = Notification.Name("LittleBoringNotch.cloudreveFilesQueued")
 }
 
 /// What came of the first attempt to send a job.
@@ -90,6 +104,9 @@ final class UploadQueue: ObservableObject {
     @Published private(set) var isUploading = false
     /// The job being sent right now.
     @Published private(set) var currentJobID: UUID?
+    /// Progress of the files dropped on the Shelf tile (screenshots have their own toast).
+    @Published private(set) var shareStatus: ShareStatus = .idle
+    private var shareStatusReset: Task<Void, Never>?
     @Published private(set) var isOnline = true
     @Published private(set) var lastSuccess: Date?
 
@@ -124,6 +141,11 @@ final class UploadQueue: ObservableObject {
             Task { @MainActor in self?.networkChanged(online: online) }
         }
         monitor.start(queue: DispatchQueue(label: "littleboringnotch.uploadqueue.network", qos: .utility))
+
+        // The password is read in the background; once it is in, waiting jobs can go.
+        NotificationCenter.default.addObserver(forName: .cloudrevePasswordLoaded, object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in self?.configurationChanged() }
+        }
         kick()
     }
 
@@ -178,9 +200,30 @@ final class UploadQueue: ObservableObject {
         discard(queued)
         save()
         report(queued.id, .cancelled)
+        if queued.kind == .file, shareStatus == .uploading, jobs(of: .file).isEmpty {
+            setShareStatus(.idle)
+        }
         if queued.kind == .screenshot, let shelfID = queued.shelfItemID,
            let item = ShelfStateViewModel.shared.items.first(where: { $0.id == shelfID }) {
             ShelfActionService.remove(item)
+        }
+    }
+
+    #if DEBUG
+    /// Shows a tile status without any upload behind it (for photographing the tile).
+    func debugShowShareStatus(_ status: ShareStatus) {
+        setShareStatus(status, resetAfter: status == .idle ? nil : 6)
+    }
+    #endif
+
+    private func setShareStatus(_ status: ShareStatus, resetAfter delay: TimeInterval? = nil) {
+        shareStatusReset?.cancel()
+        withAnimation(.smooth(duration: 0.3)) { shareStatus = status }
+        guard let delay else { return }
+        shareStatusReset = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(delay))
+            guard !Task.isCancelled else { return }
+            withAnimation(.smooth(duration: 0.3)) { self?.shareStatus = .idle }
         }
     }
 
@@ -217,6 +260,10 @@ final class UploadQueue: ObservableObject {
         save()
         if let onOutcome {
             watch(job.id, onOutcome)
+        }
+        if kind == .file {
+            // Offline: say so right away; the file stays queued and goes out later.
+            if isOnline { setShareStatus(.uploading) } else { setShareStatus(.failed, resetAfter: 3.5) }
         }
         kick()
         return true
@@ -305,6 +352,7 @@ final class UploadQueue: ObservableObject {
 
             isUploading = true
             currentJobID = job.id
+            if job.kind == .file { setShareStatus(.uploading) }
             let transfer = Task { try await self.upload(job, with: client) }
             uploadTask = transfer
 
@@ -325,6 +373,7 @@ final class UploadQueue: ObservableObject {
                     discard(job)
                     lastSuccess = .now
                     save()
+                    if job.kind == .file, jobs(of: .file).isEmpty { setShareStatus(.uploaded, resetAfter: 2.4) }
                     if outcomeHandlers[job.id] != nil {
                         // The waiting toast says it itself.
                         report(job.id, .uploaded)
@@ -336,7 +385,10 @@ final class UploadQueue: ObservableObject {
                 limiter?.cancel()
                 // A cancelled job is already gone from the queue; fail() ignores it.
                 fail(job, error: timeout.fired ? WebDAVClient.Failure.timeout : error)
-                if jobs.contains(where: { $0.id == job.id }) { report(job.id, .failed) }
+                if jobs.contains(where: { $0.id == job.id }) {
+                    report(job.id, .failed)
+                    if job.kind == .file { setShareStatus(.failed, resetAfter: 3.5) }
+                }
             }
             uploadTask = nil
             currentJobID = nil

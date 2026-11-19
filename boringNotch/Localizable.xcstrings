@@ -34655,6 +34655,56 @@
           }
         }
       }
+    },
+    "Take screenshots by pressing a key twice or three times" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir tuşa iki ya da üç kez basarak ekran görüntüsü al"
+          }
+        }
+      }
+    },
+    "Two presses" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İki basış"
+          }
+        }
+      }
+    },
+    "Region" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölge"
+          }
+        }
+      }
+    },
+    "Full screen" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm ekran"
+          }
+        }
+      }
+    },
+    "Three presses take the other one." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üç basış diğerini alır."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

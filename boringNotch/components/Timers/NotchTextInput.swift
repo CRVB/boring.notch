@@ -25,6 +25,8 @@ struct NotchTextInput<Accessory: View>: View {
     @EnvironmentObject private var vm: BoringViewModel
     @State private var window: BoringNotchSkyLightWindow?
     @FocusState private var focused: Bool
+    /// Watches for clicks anywhere outside this app while the field is being edited.
+    @State private var outsideClickMonitor: Any?
 
     var body: some View {
         HStack(spacing: 8) {
@@ -75,13 +77,38 @@ struct NotchTextInput<Accessory: View>: View {
         // Keep the notch open while the pointer wanders off to type.
         vm.isPopoverActive = true
         focused = true
+        installOutsideClickMonitor()
     }
 
     private func endEditing() {
+        removeOutsideClickMonitor()
         focused = false
         window?.wantsKeyForTextInput = false
         if vm.isPopoverActive {
             vm.isPopoverActive = false
+        }
+    }
+
+    /// While typing, the notch is held open — and nothing would let go of it when the
+    /// user clicks somewhere else. A click outside Little Boring Notch ends the
+    /// editing and closes the notch, like clicking away from any popover.
+    private func installOutsideClickMonitor() {
+        guard outsideClickMonitor == nil else { return }
+        outsideClickMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
+        ) { _ in
+            Task { @MainActor in
+                endEditing()
+                onCancel?()
+                vm.close()
+            }
+        }
+    }
+
+    private func removeOutsideClickMonitor() {
+        if let monitor = outsideClickMonitor {
+            NSEvent.removeMonitor(monitor)
+            outsideClickMonitor = nil
         }
     }
 

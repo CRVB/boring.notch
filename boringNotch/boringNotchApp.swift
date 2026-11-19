@@ -450,8 +450,78 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         }
                         return
                     }
+                    if let tab, tab.hasPrefix("notch:hideOption:") {
+                        // never | nowPlayingOnly | always — what the closed notch does while a fullscreen app is in front
+                        if let option = HideNotchOption(rawValue: String(tab.dropFirst("notch:hideOption:".count))) {
+                            Defaults[.hideNotchOption] = option
+                        }
+                        return
+                    }
+                    if tab == "todo:fake" {
+                        // Temporary "__TEST__" project with a long name and long tasks; todo:removeFake takes it away.
+                        let store = QuickTodoStore.shared
+                        UserDefaults.standard.set(store.selectedProjectID?.uuidString ?? "", forKey: "debug.todo.previousSelection")
+                        if let project = store.addProject(named: "__TEST__ Çok uzun bir proje adı denemesi") {
+                            store.addItem("Kısa görev", to: project.id)
+                            store.addItem("Bu oldukça uzun bir görev metni ve alt satıra inmesi gerekiyor, böylece birden fazla satıra yayılan görevlerin nasıl göründüğüne bakabiliriz", to: project.id)
+                            store.addItem("İkinci uzun görev: kenarlara sığmayan metin düzgünce sarılmalı ve durum simgesi ilk satırla hizalı kalmalı", to: project.id)
+                        }
+                        return
+                    }
+                    if tab == "todo:removeFake" {
+                        let store = QuickTodoStore.shared
+                        for project in store.projects where project.name.hasPrefix("__TEST__") { store.deleteProject(project.id) }
+                        if let raw = UserDefaults.standard.string(forKey: "debug.todo.previousSelection"), let id = UUID(uuidString: raw),
+                           store.projects.contains(where: { $0.id == id }) {
+                            store.selectedProjectID = id
+                        }
+                        UserDefaults.standard.removeObject(forKey: "debug.todo.previousSelection")
+                        return
+                    }
+                    if tab == "hover:force" {
+                        NotchDebugFlags.shared.forceHoverScroll.toggle()
+                        return
+                    }
+                    if tab == "music:force" {
+                        NotchDebugFlags.shared.forceMusicRow.toggle()
+                        return
+                    }
+                    if tab == "notch:info" {
+                        let text = "state=\(self.vm.notchState) hideOnClosed=\(self.vm.hideOnClosed) screen=\(self.vm.screenUUID ?? "nil") closedWidth=\(self.vm.closedNotchSize.width) closedHeight=\(self.vm.closedNotchSize.height)"
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(text, forType: .string)
+                        return
+                    }
+                    if tab == "toast:preview" {
+                        // A screenshot toast with nothing behind it, for checking how the closed notch lays out.
+                        NotchAlertCenter.shared.post(.screenshotCopied(region: true, addedToShelf: true, upload: .uploading))
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
+                            NotchAlertCenter.shared.withdraw(id: "screenshot")
+                        }
+                        return
+                    }
+                    if tab == "tile:fly" {
+                        // The file-flies-into-the-tile animation, with nothing queued.
+                        NotificationCenter.default.post(name: .cloudreveFilesQueued, object: 2)
+                        return
+                    }
+                    if let tab, tab.hasPrefix("tile:status:") {
+                        let raw = String(tab.dropFirst("tile:status:".count))
+                        let status: ShareStatus = raw == "uploading" ? .uploading : raw == "uploaded" ? .uploaded : raw == "failed" ? .failed : .idle
+                        UploadQueue.shared.debugShowShareStatus(status)
+                        return
+                    }
+                    if tab == "notch:hold" {
+                        // Keeps the opened notch from closing on its own (as a popover would), for photographing it.
+                        self.vm.isPopoverActive = true
+                        return
+                    }
+                    if tab == "notch:release" {
+                        self.vm.isPopoverActive = false
+                        return
+                    }
                     if tab == "shortcut:status" {
-                        let text = "enabled=\(Defaults[.screenshotShortcutEnabled]) key=\(Defaults[.screenshotShortcutKey].rawValue) inputMonitoring=\(ScreenshotShortcut.hasInputMonitoringAccess)"
+                        let text = "enabled=\(Defaults[.screenshotShortcutEnabled]) key=\(Defaults[.screenshotShortcutKey].rawValue) twoPresses=\(Defaults[.screenshotShortcutTwoPresses].rawValue) inputMonitoring=\(ScreenshotShortcut.hasInputMonitoringAccess)"
                         NSPasteboard.general.clearContents()
                         NSPasteboard.general.setString(text, forType: .string)
                         return
@@ -477,6 +547,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         if v.count == 4, let screen = NSScreen.main {
                             Task { await ScreenshotLauncher.capture(screen: screen, region: CGRect(x: v[0], y: v[1], width: v[2], height: v[3])) }
                         }
+                        return
+                    }
+                    if tab == "focus:info" {
+                        let front = NSWorkspace.shared.frontmostApplication
+                        let text = "front=\(front?.localizedName ?? "nil") frontIsUs=\(front?.processIdentifier == ProcessInfo.processInfo.processIdentifier) ourAppActive=\(NSApp.isActive)"
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(text, forType: .string)
+                        return
+                    }
+                    if tab == "shot:overlayCancel" {
+                        RegionSelector.shared.cancel()
                         return
                     }
                     if tab == "shot:overlay" {

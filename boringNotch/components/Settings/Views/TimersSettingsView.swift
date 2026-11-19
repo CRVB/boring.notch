@@ -18,6 +18,7 @@ struct TimersSettingsView: View {
     @Default(.reminderSnoozeMinutes) private var snoozeMinutes
     @Default(.screenshotShortcutEnabled) private var shortcutEnabled
     @Default(.screenshotShortcutKey) private var shortcutKey
+    @Default(.screenshotShortcutTwoPresses) private var twoPresses
     @State private var inputMonitoring = ScreenshotShortcut.hasInputMonitoringAccess
     @Default(.countdownPeekMode) private var peekMode
     @Default(.reminderAlertSeconds) private var alertSeconds
@@ -43,7 +44,7 @@ struct TimersSettingsView: View {
                     Text("Also add screenshots to the Shelf")
                 }
                 Defaults.Toggle(key: .screenshotShortcutEnabled) {
-                    Text("Take a region screenshot by double-pressing a key")
+                    Text("Take screenshots by pressing a key twice or three times")
                 }
                 if shortcutEnabled {
                     Picker("Shortcut key", selection: $shortcutKey) {
@@ -51,6 +52,13 @@ struct TimersSettingsView: View {
                             Text(verbatim: "\(key.symbol) \(key.name)").tag(key)
                         }
                     }
+                    Picker("Two presses", selection: $twoPresses) {
+                        Text("Region").tag(ShortcutScreenshotMode.region)
+                        Text("Full screen").tag(ShortcutScreenshotMode.fullScreen)
+                    }
+                    Text("Three presses take the other one.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     if !inputMonitoring {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Using the shortcut in other apps needs Input Monitoring permission.")

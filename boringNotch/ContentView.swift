@@ -25,6 +25,7 @@ struct ContentView: View {
     @ObservedObject var countdownTimer = CountdownTimerManager.shared
     @ObservedObject var notchAlerts = NotchAlertCenter.shared
     @ObservedObject var tabTransition = TabTransitionState.shared
+    @ObservedObject var debugFlags = NotchDebugFlags.shared
     /// Which entry of the closed-notch activity stack is on top.
     @State private var activityIndex: Int = 0
     @State private var hoverTask: Task<Void, Never>?
@@ -116,7 +117,7 @@ struct ContentView: View {
         // The inline song-change peek is drawn inside the music pill, so it
         // has to bring the pill with it even when the persistent live
         // activity is turned off — otherwise the peek never appears.
-        if musicIsShowing || showingInlineMusicPeek {
+        if musicIsShowing || showingInlineMusicPeek || NotchDebugFlags.shared.forceMusicRow {
             items.append(.music)
         }
 
@@ -776,7 +777,14 @@ struct ContentView: View {
                     }
                     .padding(.horizontal, 8)
                 )
-                .frame(width: musicActivityCenterWidth)
+                // Little Boring Notch: with a wider row below (a toast) the pill grows, and
+                // the music row spreads over all of it — art at the far left, spectrum at the far right.
+                .conditionalModifier(stretchesToWiderRow) { view in
+                    view.frame(minWidth: musicActivityCenterWidth, maxWidth: .infinity)
+                }
+                .conditionalModifier(!stretchesToWiderRow) { view in
+                    view.frame(width: musicActivityCenterWidth)
+                }
 
             HStack {
                 MusicVisualizer(
@@ -800,10 +808,18 @@ struct ContentView: View {
                 alignment: .center
             )
         }
+        .conditionalModifier(stretchesToWiderRow) { view in
+            view.frame(maxWidth: .infinity)
+        }
         .frame(
             height: displayClosedNotchHeight,
             alignment: .center
         )
+    }
+
+    /// A toast or countdown row sits under the activity and may be wider than it.
+    private var stretchesToWiderRow: Bool {
+        closedNotchAlert != nil || showsCountdownPeek
     }
 
     @ViewBuilder
@@ -1129,3 +1145,15 @@ struct GeneralDropTargetDelegate: DropDelegate {
         .environmentObject(vm)
         .frame(width: vm.notchSize.width, height: vm.notchSize.height)
 }
+
+/// Debug-only switches for checking layouts without a real player or notification.
+@MainActor
+final class NotchDebugFlags: ObservableObject {
+    static let shared = NotchDebugFlags()
+    /// Shows the closed notch's music row even when nothing plays.
+    @Published var forceMusicRow = false
+    /// Makes sliding texts behave as if the pointer were on them.
+    @Published var forceHoverScroll = false
+    private init() {}
+}
+

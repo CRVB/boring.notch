@@ -4,9 +4,10 @@
 //
 //  SPDX-License-Identifier: GPL-3.0-only
 //
-//  Double-pressing a modifier key (⌘ by default) starts a region screenshot,
-//  from any app. Watching keys across apps needs macOS's "Input Monitoring"
-//  permission; without it the shortcut simply stays quiet.
+//  Pressing a modifier key (⌘ by default) twice takes one kind of screenshot,
+//  three times the other kind — from any app. Which is which is a setting.
+//  Watching keys across apps needs macOS's "Input Monitoring" permission;
+//  without it the shortcut simply stays quiet.
 //
 
 import AppKit
@@ -45,11 +46,25 @@ enum ShortcutModifier: String, CaseIterable, Identifiable, Defaults.Serializable
     }
 }
 
+/// What a screenshot shortcut takes.
+enum ShortcutScreenshotMode: String, CaseIterable, Identifiable, Defaults.Serializable {
+    case region
+    case fullScreen
+
+    var id: Self { self }
+
+    var opposite: ShortcutScreenshotMode { self == .region ? .fullScreen : .region }
+
+    var launcherMode: ScreenshotLauncher.Mode { self == .region ? .region : .fullScreen }
+}
+
 @MainActor
 final class ScreenshotShortcut {
     static let shared = ScreenshotShortcut()
 
-    private var detector = DoubleTapDetector()
+    private var detector = TapSequenceDetector()
+    /// Waits out the pause in which a third press could still arrive.
+    private var pendingDouble: Task<Void, Never>?
     private var globalMonitor: Any?
     private var localMonitor: Any?
     private var cancellables: Set<AnyCancellable> = []
@@ -120,22 +135,38 @@ final class ScreenshotShortcut {
     private func handle(kind: NSEvent.EventType, flags: NSEvent.ModifierFlags, time: TimeInterval) {
         guard kind == .flagsChanged else {
             detector.otherInput()
+            pendingDouble?.cancel()
             return
         }
         let watched = Defaults[.screenshotShortcutKey].flag
         let held = flags.intersection(Self.modifierMask)
-        let fired = detector.modifiersChanged(
+        let outcome = detector.modifiersChanged(
             watchedDown: held.contains(watched),
             othersDown: !held.subtracting(watched).isEmpty,
             at: time)
-        if fired { trigger() }
+        switch outcome {
+        case .none:
+            break
+        case .doublePending:
+            // Two presses might still turn into three: wait before acting.
+            pendingDouble?.cancel()
+            let wait = detector.maxGap + 0.03
+            pendingDouble = Task { [weak self] in
+                try? await Task.sleep(for: .seconds(wait))
+                guard !Task.isCancelled, let self, self.detector.confirmDouble() else { return }
+                self.trigger(Defaults[.screenshotShortcutTwoPresses])
+            }
+        case .triple:
+            pendingDouble?.cancel()
+            trigger(Defaults[.screenshotShortcutTwoPresses].opposite)
+        }
     }
 
-    private func trigger() {
+    private func trigger(_ mode: ShortcutScreenshotMode) {
         // One selection at a time.
         guard !RegionSelector.shared.isActive else { return }
         let mouse = NSEvent.mouseLocation
         let screen = NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) } ?? NSScreen.main
-        ScreenshotLauncher.take(.region, on: screen)
+        ScreenshotLauncher.take(mode.launcherMode, on: screen)
     }
 }

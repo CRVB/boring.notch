@@ -198,6 +198,8 @@ final class RegionSelector {
 
     private var window: NSWindow?
     private var completion: ((CGRect?) -> Void)?
+    /// Whoever was in front before the selection took the focus; they get it back afterwards.
+    private var previousApp: NSRunningApplication?
 
     /// A selection is on screen right now.
     var isActive: Bool { window != nil }
@@ -209,6 +211,10 @@ final class RegionSelector {
     func select(on screen: NSScreen, completion: @escaping (CGRect?) -> Void) {
         finish(nil)
         self.completion = completion
+
+        // The overlay needs the keyboard (Esc) and so makes this app active; remember who had it.
+        let front = NSWorkspace.shared.frontmostApplication
+        previousApp = front?.processIdentifier == ProcessInfo.processInfo.processIdentifier ? nil : front
 
         let window = SelectionWindow(
             contentRect: screen.frame, styleMask: .borderless, backing: .buffered, defer: false, screen: screen)
@@ -238,15 +244,34 @@ final class RegionSelector {
         NSCursor.crosshair.push()
     }
 
+    /// Ends a selection that is still running, as if it had been cancelled.
+    func cancel() {
+        finish(nil)
+    }
+
     private func finish(_ rect: CGRect?) {
         guard window != nil || completion != nil else { return }
         if window != nil { NSCursor.pop() }
         window?.orderOut(nil)
         window?.contentView = nil
         window = nil
+        giveFocusBack()
         let done = completion
         completion = nil
         done?(rect)
+    }
+
+    /// Hands the keyboard focus back to the app that was in front, so this app doesn't stay selected.
+    private func giveFocusBack() {
+        let app = previousApp
+        previousApp = nil
+        if let app, !app.isTerminated {
+            NSApp.yieldActivation(to: app)
+            app.activate()
+        } else {
+            // Nobody to hand it to: at least stop being the active app.
+            NSApp.deactivate()
+        }
     }
 }
 
